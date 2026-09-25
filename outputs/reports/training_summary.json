@@ -1,0 +1,384 @@
+{
+  "dataset": {
+    "path": "/home/user/7150CEM-Ecommerce-Returns-CLV/data/synthetic_ecommerce.csv",
+    "n_transactions": 120000,
+    "n_customers": 12000,
+    "return_rate": 0.294575,
+    "fingerprint": "d86813dc041fed76"
+  },
+  "protocol": {
+    "split_strategy": "temporal",
+    "val_size": 0.15,
+    "test_size": 0.15,
+    "resampler": "smote",
+    "calibration": "isotonic",
+    "cv_folds": 3,
+    "search_iterations": 8,
+    "scoring": "average_precision",
+    "economics": {
+      "gross_margin_rate": 0.3,
+      "return_logistics_cost_gbp": 4.5,
+      "return_restocking_loss_rate": 0.05,
+      "intervention_cost_gbp": 4.75,
+      "intervention_effectiveness": 0.25
+    },
+    "random_seed": 42
+  },
+  "split": {
+    "strategy": "temporal",
+    "train_period": [
+      "2024-01-01",
+      "2025-05-26"
+    ],
+    "validation_period": [
+      "2025-05-26",
+      "2025-09-11"
+    ],
+    "test_period": [
+      "2025-09-11",
+      "2025-12-30"
+    ],
+    "train": {
+      "n_rows": 83994,
+      "share": 0.6999,
+      "positive_rate": 0.2944
+    },
+    "validation": {
+      "n_rows": 17885,
+      "share": 0.149,
+      "positive_rate": 0.293
+    },
+    "test": {
+      "n_rows": 18121,
+      "share": 0.151,
+      "positive_rate": 0.2969
+    }
+  },
+  "candidates": [
+    {
+      "model": "Majority-class baseline",
+      "cv_score": NaN,
+      "best_params": {},
+      "fit_seconds": 0.2,
+      "validation": {
+        "threshold": 0.5,
+        "accuracy": 0.7069611406206319,
+        "balanced_accuracy": 0.5,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "specificity": 1.0,
+        "mcc": 0.0,
+        "roc_auc": 0.5,
+        "average_precision": 0.2930388593793682,
+        "brier_score": 0.20716891205796198,
+        "positive_rate_predicted": 0.0,
+        "positive_rate_actual": 0.2930388593793682,
+        "tn": 12644,
+        "fp": 0,
+        "fn": 5241,
+        "tp": 0
+      },
+      "test_at_0.5": {
+        "threshold": 0.5,
+        "accuracy": 0.7030517079631367,
+        "balanced_accuracy": 0.5,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "specificity": 1.0,
+        "mcc": 0.0,
+        "roc_auc": 0.5,
+        "average_precision": 0.2969482920368633,
+        "brier_score": 0.2087765483651968,
+        "positive_rate_predicted": 0.0,
+        "positive_rate_actual": 0.2969482920368633,
+        "tn": 12740,
+        "fp": 0,
+        "fn": 5381,
+        "tp": 0
+      }
+    },
+    {
+      "model": "Logistic Regression",
+      "cv_score": 0.4635038624508381,
+      "best_params": {
+        "C": 0.0745934328572655,
+        "solver": "lbfgs"
+      },
+      "fit_seconds": 23.2,
+      "validation": {
+        "threshold": 0.5,
+        "accuracy": 0.611629857422421,
+        "balanced_accuracy": 0.6360086129482693,
+        "precision": 0.40516186450105685,
+        "recall": 0.6949055523755009,
+        "f1": 0.5118763176387913,
+        "specificity": 0.5771116735210376,
+        "mcc": 0.247623953615954,
+        "roc_auc": 0.686209199349953,
+        "average_precision": 0.46772235182756483,
+        "brier_score": 0.2243592268745208,
+        "positive_rate_predicted": 0.502599944087224,
+        "positive_rate_actual": 0.2930388593793682,
+        "tn": 7297,
+        "fp": 5347,
+        "fn": 1599,
+        "tp": 3642
+      },
+      "test_at_0.5": {
+        "threshold": 0.5,
+        "accuracy": 0.6070857016720932,
+        "balanced_accuracy": 0.6263689220488275,
+        "precision": 0.40329218106995884,
+        "recall": 0.6738524437836834,
+        "f1": 0.5045922627330921,
+        "specificity": 0.5788854003139717,
+        "mcc": 0.23096549260384963,
+        "roc_auc": 0.6778912196731508,
+        "average_precision": 0.46172008673859566,
+        "brier_score": 0.22523449967649575,
+        "positive_rate_predicted": 0.496164670823906,
+        "positive_rate_actual": 0.2969482920368633,
+        "tn": 7375,
+        "fp": 5365,
+        "fn": 1755,
+        "tp": 3626
+      }
+    },
+    {
+      "model": "Random Forest",
+      "cv_score": 0.45387097631729484,
+      "best_params": {
+        "max_depth": 12,
+        "max_features": "log2",
+        "min_samples_leaf": 38,
+        "n_estimators": 279
+      },
+      "fit_seconds": 248.2,
+      "validation": {
+        "threshold": 0.5,
+        "accuracy": 0.6379647749510763,
+        "balanced_accuracy": 0.6307830265480946,
+        "precision": 0.4194937369519833,
+        "recall": 0.6134325510398779,
+        "f1": 0.49825648973266173,
+        "specificity": 0.6481335020563113,
+        "mcc": 0.24057819402655972,
+        "roc_auc": 0.6809207311659022,
+        "average_precision": 0.45409900121176777,
+        "brier_score": 0.21796667976809583,
+        "positive_rate_predicted": 0.42851551579535924,
+        "positive_rate_actual": 0.2930388593793682,
+        "tn": 8195,
+        "fp": 4449,
+        "fn": 2026,
+        "tp": 3215
+      },
+      "test_at_0.5": {
+        "threshold": 0.5,
+        "accuracy": 0.6300424921361956,
+        "balanced_accuracy": 0.6175764587710058,
+        "precision": 0.4134048959287865,
+        "recall": 0.5868797621259989,
+        "f1": 0.48509984639016895,
+        "specificity": 0.6482731554160126,
+        "mcc": 0.21758364543768877,
+        "roc_auc": 0.66932663534729,
+        "average_precision": 0.44644008321457007,
+        "brier_score": 0.21989529629015808,
+        "positive_rate_predicted": 0.4215551018155731,
+        "positive_rate_actual": 0.2969482920368633,
+        "tn": 8259,
+        "fp": 4481,
+        "fn": 2223,
+        "tp": 3158
+      }
+    },
+    {
+      "model": "XGBoost",
+      "cv_score": 0.4537239362654752,
+      "best_params": {
+        "colsample_bytree": 0.8253152871382157,
+        "learning_rate": 0.037094276752507684,
+        "max_depth": 4,
+        "min_child_weight": 2,
+        "n_estimators": 539,
+        "reg_lambda": 0.09206654892274767,
+        "subsample": 0.8733054075301833
+      },
+      "fit_seconds": 42.2,
+      "validation": {
+        "threshold": 0.5,
+        "accuracy": 0.701425775789768,
+        "balanced_accuracy": 0.60053805046611,
+        "precision": 0.4871060171919771,
+        "recall": 0.35680213699675634,
+        "f1": 0.4118942731277533,
+        "specificity": 0.8442739639354635,
+        "mcc": 0.22290735087817792,
+        "roc_auc": 0.6813621184319171,
+        "average_precision": 0.45525018288337626,
+        "brier_score": 0.19552550849363975,
+        "positive_rate_predicted": 0.21464914733016494,
+        "positive_rate_actual": 0.2930388593793682,
+        "tn": 10675,
+        "fp": 1969,
+        "fn": 3371,
+        "tp": 1870
+      },
+      "test_at_0.5": {
+        "threshold": 0.5,
+        "accuracy": 0.696319187682799,
+        "balanced_accuracy": 0.5941850606981889,
+        "precision": 0.483989501312336,
+        "recall": 0.3426872328563464,
+        "f1": 0.4012621042324013,
+        "specificity": 0.8456828885400314,
+        "mcc": 0.21121791390117506,
+        "roc_auc": 0.6681798303642358,
+        "average_precision": 0.4479742868661898,
+        "brier_score": 0.19872649513449916,
+        "positive_rate_predicted": 0.2102532972793996,
+        "positive_rate_actual": 0.2969482920368633,
+        "tn": 10774,
+        "fp": 1966,
+        "fn": 3537,
+        "tp": 1844
+      }
+    }
+  ],
+  "selected_model": "Logistic Regression",
+  "threshold": {
+    "threshold": 0.38,
+    "criterion": "net_saving",
+    "score": 2548.4210000000003,
+    "fitted_on": "validation (threshold half)"
+  },
+  "deployed_test_metrics": {
+    "threshold": 0.38,
+    "accuracy": 0.6957673417581811,
+    "balanced_accuracy": 0.6004480559396003,
+    "precision": 0.4837758112094395,
+    "recall": 0.36573127671436534,
+    "f1": 0.41655201608635833,
+    "specificity": 0.8351648351648352,
+    "mcc": 0.21999496754463335,
+    "roc_auc": 0.6772928441457922,
+    "average_precision": 0.44952785348838115,
+    "brier_score": 0.19181935425352084,
+    "positive_rate_predicted": 0.22449092213454003,
+    "positive_rate_actual": 0.2969482920368633,
+    "tn": 10640,
+    "fp": 2100,
+    "fn": 3413,
+    "tp": 1968
+  },
+  "achievable_ceiling": {
+    "roc_auc": 0.678396989290477,
+    "average_precision": 0.4578121755428415,
+    "brier_score": 0.1911714526266828
+  },
+  "signal_attainment": {
+    "roc_auc_attainment": 0.9938107411505304,
+    "average_precision_attainment": 0.9819045396845609
+  },
+  "business_impact": [
+    {
+      "policy": "Do nothing",
+      "n_flagged": 0,
+      "flag_rate": 0.0,
+      "baseline_return_cost_gbp": 258974.0145,
+      "gross_saving_gbp": 0.0,
+      "intervention_spend_gbp": 0.0,
+      "net_saving_gbp": 0.0,
+      "residual_return_cost_gbp": 258974.0145,
+      "saving_per_transaction_gbp": 0.0,
+      "roi": NaN
+    },
+    {
+      "policy": "Intervene on every order",
+      "n_flagged": 18121,
+      "flag_rate": 1.0,
+      "baseline_return_cost_gbp": 258974.0145,
+      "gross_saving_gbp": 64743.503625,
+      "intervention_spend_gbp": 86074.75,
+      "net_saving_gbp": -21331.246375000002,
+      "residual_return_cost_gbp": 194230.51087499998,
+      "saving_per_transaction_gbp": -1.1771561379062967,
+      "roi": 0.7521776551776217
+    },
+    {
+      "policy": "Rule of thumb (no model)",
+      "n_flagged": 8332,
+      "flag_rate": 0.45979802439158984,
+      "baseline_return_cost_gbp": 258974.0145,
+      "gross_saving_gbp": 37971.854375,
+      "intervention_spend_gbp": 39577.0,
+      "net_saving_gbp": -1605.1456249999974,
+      "residual_return_cost_gbp": 221002.160125,
+      "saving_per_transaction_gbp": -0.0885793071574415,
+      "roi": 0.9594424634257271
+    },
+    {
+      "policy": "Model, global threshold 0.38",
+      "n_flagged": 4068,
+      "flag_rate": 0.22449092213454003,
+      "baseline_return_cost_gbp": 258974.0145,
+      "gross_saving_gbp": 23199.547625,
+      "intervention_spend_gbp": 19323.0,
+      "net_saving_gbp": 3876.5476249999992,
+      "residual_return_cost_gbp": 235774.46687499998,
+      "saving_per_transaction_gbp": 0.21392570084432422,
+      "roi": 1.20061831108006
+    },
+    {
+      "policy": "Model, value-aware rule",
+      "n_flagged": 3915,
+      "flag_rate": 0.21604767948788697,
+      "baseline_return_cost_gbp": 258974.0145,
+      "gross_saving_gbp": 34495.505875,
+      "intervention_spend_gbp": 18596.25,
+      "net_saving_gbp": 15899.255875000003,
+      "residual_return_cost_gbp": 224478.508625,
+      "saving_per_transaction_gbp": 0.8773939559075108,
+      "roi": 1.8549710761578277
+    }
+  ],
+  "artefacts": {
+    "model_bundle": "/home/user/7150CEM-Ecommerce-Returns-CLV/models/return_risk_model.joblib",
+    "reports": [
+      "clv_by_risk_segment.csv",
+      "clv_policy_uplift.csv",
+      "customer_clv.csv",
+      "eda_feature_correlations.csv",
+      "eda_monthly_trend.csv",
+      "eda_return_rate_by_customer_segment.csv",
+      "eda_return_rate_by_device_type.csv",
+      "eda_return_rate_by_payment_method.csv",
+      "eda_return_rate_by_product_category.csv",
+      "feature_importance.csv",
+      "model_comparison.csv",
+      "policy_comparison.csv",
+      "threshold_sweep_test.csv",
+      "threshold_sweep_validation.csv"
+    ],
+    "figures": [
+      "00_feature_correlations.png",
+      "00_monthly_trend.png",
+      "00_order_value_by_outcome.png",
+      "00_return_rate_by_dimension.png",
+      "01_roc_curves.png",
+      "02_precision_recall.png",
+      "03_calibration.png",
+      "04_confusion_matrices.png",
+      "05_threshold_sweep.png",
+      "06_model_comparison.png",
+      "07_policy_impact.png",
+      "08_clv_by_risk_segment.png",
+      "09_clv_distribution.png",
+      "10_clv_policy_uplift.png",
+      "11_feature_importance.png"
+    ]
+  }
+}

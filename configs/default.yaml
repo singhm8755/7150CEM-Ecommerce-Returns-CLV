@@ -120,10 +120,15 @@ clv:
   horizon_years: 3
   discount_rate: 0.10
   annual_retention_rate: 0.75
+  # Band edges are derived from the economics rather than picked as round
+  # numbers. At the mean order value of ~GBP 124 a return costs ~GBP 47.77, so
+  # intervening breaks even at p = 4.75 / (0.25 * 47.77) = 0.40: above that band
+  # edge, acting pays at a typical order value. The lower edge sits near the
+  # first quartile of the customer distribution.
   risk_bands:
     low: 0.25      # p < 0.25            -> Low_Risk
-    medium: 0.50   # 0.25 <= p < 0.50    -> Medium_Risk
-                   # p >= 0.50           -> High_Risk
+    medium: 0.40   # 0.25 <= p < 0.40    -> Medium_Risk
+                   # p >= 0.40           -> High_Risk (intervention breaks even)
 
 explainability:
   shap_sample_size: 3000

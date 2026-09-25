@@ -1,0 +1,4 @@
+risk_segment,customers,mean_predicted_return_prob,mean_actual_return_rate,mean_order_value_gbp,mean_annual_orders,mean_clv_gbp,total_clv_gbp,total_revenue_gbp,share_of_customers
+Low_Risk,2835,0.1672,0.1718,123.4805,5.442,310.1461,879264.2996,3410724.86,0.2362
+Medium_Risk,7802,0.3155,0.316,123.7536,5.641,242.6595,1893229.395,9792966.58,0.6502
+High_Risk,1363,0.4306,0.4293,123.336,5.4332,174.8534,238325.2389,1631371.94,0.1136

@@ -194,8 +194,15 @@ class EconomicsConfig:
 
 @dataclass(frozen=True)
 class RiskBands:
+    """Band edges on predicted return probability.
+
+    The upper edge is the break-even probability at a typical order value, so
+    "High risk" means "intervening pays" rather than an arbitrary cut-off. See
+    the derivation in ``configs/default.yaml``.
+    """
+
     low: float = 0.25
-    medium: float = 0.50
+    medium: float = 0.40
 
 
 @dataclass(frozen=True)

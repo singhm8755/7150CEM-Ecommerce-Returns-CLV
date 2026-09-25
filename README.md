@@ -25,7 +25,15 @@ the result as a REST API, a Docker image and an interactive dashboard.
 ## Headline results
 
 <!-- BEGIN:headline -->
-_Run `make all` to populate this table._
+| Result | Value | Context |
+| --- | --- | --- |
+| Test ROC-AUC | **0.677** | against an achievable ceiling of 0.678 |
+| Share of achievable signal captured | **99.4%** | the remaining gap is irreducible noise |
+| Average precision | 0.450 | no-skill baseline 0.297 |
+| Brier score | 0.192 | calibrated, so the probabilities can be multiplied by money |
+| Best intervention policy | **£15,899** | Model, value-aware rule, over the 18,121-order test period |
+| Same intervention without a model | -£21,331 | intervening on every order destroys value |
+| Portfolio lifetime value | £3,010,819 | 12,000 customers, 3-year horizon |
 <!-- END:headline -->
 
 The second row is the one worth pausing on. The project proposal targeted
@@ -61,7 +69,13 @@ Measured on the held-out test period, against the alternatives a retailer would
 otherwise pick:
 
 <!-- BEGIN:policies -->
-_Run `make all` to populate this table._
+| Policy | Orders flagged | Intervention spend | Gross saving | **Net** |
+| --- | ---: | ---: | ---: | ---: |
+| Model, value-aware rule | 3,915 (22%) | £18,596 | £34,496 | **£15,899** |
+| Model, global threshold 0.38 | 4,068 (22%) | £19,323 | £23,200 | **£3,877** |
+| Do nothing | 0 (0%) | £0 | £0 | **£0** |
+| Rule of thumb (no model) | 8,332 (46%) | £39,577 | £37,972 | **-£1,605** |
+| Intervene on every order | 18,121 (100%) | £86,075 | £64,744 | **-£21,331** |
 <!-- END:policies -->
 
 Intervening on everything loses money. A plausible hand-written rule — flag cash
@@ -92,7 +106,12 @@ in the dataset itself. Each fix is measured rather than asserted — run
 ### Measured: what resampling before cross-validation costs you
 
 <!-- BEGIN:experiment_leakage -->
-_Run `make all` to populate this table._
+| Protocol | Cross-validated average precision | Test average precision | Optimism gap |
+| --- | ---: | ---: | ---: |
+| Resampling inside cross-validation (correct) | 0.4173 | 0.4068 | **+0.0104** |
+| Resampling before cross-validation (leaky) | 0.8626 | 0.4068 | **+0.4558** |
+
+Resampling first inflates the reported cross-validated score by +0.4454 without improving the model.
 <!-- END:experiment_leakage -->
 
 The inflated cross-validation score is the dangerous part. The test score barely
@@ -102,13 +121,24 @@ documentation once deployed.
 ### Measured: what tuning a threshold on the test set costs you
 
 <!-- BEGIN:experiment_threshold -->
-_Run `make all` to populate this table._
+| Threshold chosen on | Threshold | F1 reported on the test set |
+| --- | ---: | ---: |
+| Validation (correct) | 0.32 | 0.4831 |
+| Test set (the mistake) | 0.25 | 0.4899 |
+
+Tuning on the test set overstates F1 by +0.0068 — an improvement nobody could have obtained in advance.
 <!-- END:experiment_threshold -->
 
 ### Measured: whether the engineered features earned their place
 
 <!-- BEGIN:experiment_ablation -->
-_Run `make all` to populate this table._
+| Model | Raw columns only | With engineered features | Change |
+| --- | ---: | ---: | ---: |
+| Logistic Regression | 0.4580 | 0.4617 | **+0.0037** |
+| Random Forest | 0.4069 | 0.4068 | **-0.0001** |
+| XGBoost | 0.4344 | 0.4394 | **+0.0049** |
+
+_Test-set average precision._
 <!-- END:experiment_ablation -->
 
 The answer depends on the model class, which is why the ablation runs across all
@@ -122,12 +152,23 @@ would have made the features look worthless.
 ## Model comparison
 
 <!-- BEGIN:models -->
-_Run `make all` to populate this table._
+| Model | CV average precision | Test ROC-AUC | Test average precision | Fit time |
+| --- | --- | --- | --- | --- |
+| Majority-class baseline | — | 0.5000 | 0.2969 | 0s |
+| **Logistic Regression** | 0.4635 | 0.6779 | 0.4617 | 23s |
+| Random Forest | 0.4539 | 0.6693 | 0.4464 | 248s |
+| XGBoost | 0.4537 | 0.6682 | 0.4480 | 42s |
+| _Achievable ceiling_ | — | _0.6784_ | _0.4578_ | — |
 <!-- END:models -->
 
 Every candidate sits within a hair of the ceiling and of each other, so the
 simplest model wins on interpretability, latency and maintenance cost. Knowing
 *why* they converge — rather than reaching for a bigger model — is the point.
+
+The ceiling row is itself estimated on the same finite test sample, so a model
+can land a fraction above it by chance — as logistic regression does on average
+precision here. That is sampling noise in the estimate, not a model beating
+information theory; the gap is well inside what 18,121 rows can resolve.
 
 ![ROC curves](outputs/figures/01_roc_curves.png)
 
@@ -150,13 +191,31 @@ CLV = Σ  annual contribution × retention^(t−1) / (1 + discount)^t
 ```
 
 <!-- BEGIN:clv_segments -->
-_Run `make all` to populate this table._
+| Risk band | Customers | Mean predicted return rate | Actual return rate | Mean CLV |
+| --- | ---: | ---: | ---: | ---: |
+| Low Risk | 2,835 | 16.7% | 17.2% | £310 |
+| Medium Risk | 7,802 | 31.6% | 31.6% | £243 |
+| High Risk | 1,363 | 43.1% | 42.9% | £175 |
 <!-- END:clv_segments -->
 
-Predicted and actual return rates track each other within every band, which is
-what makes the bands usable for targeting. The dashboard exposes the unit
-economics as sliders, because an assumption the reader can move is more honest
-than one buried in a config file.
+Predicted and actual return rates track each other to within half a percentage
+point in every band — the payoff from calibrating, and what makes the bands
+usable for targeting at all.
+
+The band edges are derived rather than chosen: 0.40 is the probability at which
+intervening breaks even on an order of average value, so "high risk" means
+"worth acting on" instead of an arbitrary round number.
+
+**Targeting customers is worth far less than targeting orders.** Intervening on
+every order from the 1,363 high-risk customers adds about £4,900 of lifetime
+value, against £15,899 from flagging individual orders over a single test
+period. Averaging a customer's risk throws away the variation across their
+orders, and that variation is where most of the money is. The customer view is
+the right one for retention and segmentation; the order view is the right one
+for intervention.
+
+The dashboard exposes the unit economics as sliders, because an assumption the
+reader can move is more honest than one buried in a config file.
 
 ![CLV by risk band](outputs/figures/08_clv_by_risk_segment.png)
 
@@ -165,7 +224,18 @@ than one buried in a config file.
 ## What drives a prediction
 
 <!-- BEGIN:features -->
-_Run `make all` to populate this table._
+| Feature | Mean absolute SHAP | Pushes |
+| --- | ---: | --- |
+| `customer_segment_First_Time` | 0.3629 | towards a return |
+| `product_category_Electronics` | 0.2435 | towards keeping |
+| `product_category_Fashion` | 0.2382 | towards a return |
+| `customer_segment_Wholesale` | 0.2095 | towards keeping |
+| `customer_segment_Repeat` | 0.1354 | towards a return |
+| `is_low_click_depth` | 0.1300 | towards a return |
+| `payment_method_PayPal` | 0.1246 | towards keeping |
+| `payment_method_Credit_Card` | 0.1243 | towards keeping |
+| `device_type_Desktop` | 0.0687 | towards keeping |
+| `product_category_Home_Garden` | 0.0643 | towards keeping |
 <!-- END:features -->
 
 These match the documented data-generating process — the check that matters,
@@ -206,12 +276,14 @@ curl -X POST http://localhost:8000/predict \
 ```json
 {
   "model_name": "Logistic Regression",
+  "threshold": 0.38,
   "predictions": [{
-    "return_probability": 0.6012,
+    "return_probability": 0.7308,
     "risk_band": "High_Risk",
+    "flagged_by_threshold": true,
     "flagged_by_expected_value": true,
-    "expected_return_cost_gbp": 27.53,
-    "expected_intervention_saving_gbp": 2.11,
+    "expected_return_cost_gbp": 36.54,
+    "expected_intervention_saving_gbp": 4.38,
     "recommended_action": "intervene: expected saving exceeds the intervention cost"
   }]
 }
@@ -220,6 +292,25 @@ curl -X POST http://localhost:8000/predict \
 Every response carries both decisions — the global threshold and the
 expected-value rule — plus the pounds behind the recommendation, so the caller
 can apply whichever matches their operating policy.
+
+`POST /explain` returns the reasoning behind any single score:
+
+```json
+{
+  "return_probability": 0.7308,
+  "top_contributions": [
+    {"feature": "customer_segment_First_Time",     "contribution":  0.478, "direction": "increases return risk"},
+    {"feature": "payment_method_Cash_on_Delivery", "contribution":  0.269, "direction": "increases return risk"},
+    {"feature": "is_low_click_depth",              "contribution":  0.231, "direction": "increases return risk"},
+    {"feature": "product_category_Fashion",        "contribution":  0.225, "direction": "increases return risk"}
+  ]
+}
+```
+
+Those are exactly the factors that generated the data — first-time buyer,
+cash on delivery, a rushed browsing session, a fashion item — which is the
+check that matters: a model citing drivers that contradict the known process
+would be fitting noise whatever its metrics said.
 
 ### In Docker
 
@@ -280,7 +371,7 @@ the model, there is only ever one implementation of the feature logic.
 ├── dashboard/app.py          Streamlit dashboard
 ├── notebooks/                the original coursework, de-Colab'd
 ├── configs/default.yaml      every parameter the pipeline depends on
-├── tests/                    133 tests
+├── tests/                    136 tests
 └── docs/                     methodology, model card, data dictionary
 ```
 
@@ -304,7 +395,7 @@ number is worse than no number, because nothing signals that it is wrong.
 ## Testing and CI
 
 ```bash
-make test        # 133 tests
+make test        # 136 tests
 make test-fast   # skips the model-training tests
 make lint        # ruff check + format
 ```
@@ -330,7 +421,19 @@ returned. Schema, generating process and known defects are in
 Validation against the committed dataset:
 
 <!-- BEGIN:validation -->
-_Run `make all` to populate this table._
+| Check | Status | Detail |
+| --- | --- | --- |
+| `schema` | PASS | all 14 required columns present |
+| `missing_values` | PASS | no missing values |
+| `duplicate_ids` | PASS | transaction_id is unique |
+| `feature_bounds` | PASS | 4 features within documented bounds |
+| `target_binary` | PASS | returned is binary |
+| `class_balance` | PASS | positive rate 20.50%, majority:minority 3.88:1 |
+| `customer_invariants` | PASS | customer_segment constant per customer |
+| `tenure_consistency` | PASS | tenure increases with transaction date |
+| `order_frequency_consistency` | PASS | matches observed trailing-12-month counts |
+| `business_logic` | PASS | COD 27.2% vs other 19.6% (as expected); segments First_Time 40.0% > Repeat 26.2% > Wholesale 9.6% (confirmed) |
+| `dgp_calibration` | PASS | observed 20.50% vs DGP expectation 20.62% (gap 0.12%) |
 <!-- END:validation -->
 
 Two warnings, both genuine. A validation suite that passes everything is not

@@ -54,6 +54,9 @@ from returns_clv.splits import DataSplit, cv_indices, make_split
 
 logger = get_logger(__name__)
 
+# Rows kept as the SHAP reference distribution inside the saved bundle.
+BACKGROUND_SAMPLE_SIZE = 300
+
 
 @dataclass
 class ModelResult:
@@ -311,6 +314,7 @@ def run_training(config: Config, *, df: pd.DataFrame | None = None) -> dict[str,
         feature_columns=config.features.all_features,
         categorical_levels=categorical_levels(df, config),
         threshold_criterion=choice.criterion,
+        explainer_background=_explainer_background(best.estimator, split.train, config),
         metrics={"test": deployed_metrics, "ceiling": ceiling, **attainment},
         config_summary=evaluate.evaluation_config_summary(config),
         economics={
@@ -360,6 +364,23 @@ def run_training(config: Config, *, df: pd.DataFrame | None = None) -> dict[str,
     write_json(summary, reports / "training_summary.json")
     banner(logger, "training complete")
     return summary
+
+
+def _explainer_background(estimator: Any, train: pd.DataFrame, config: Config) -> np.ndarray | None:
+    """A sample of training rows in transformed space, stored for serving-time SHAP.
+
+    Explaining one prediction requires a reference distribution to measure it
+    against. At serving time only the single request row is available, so the
+    reference has to travel with the model.
+    """
+    from returns_clv.explain import transformed_frame
+
+    try:
+        sample = train.sample(min(BACKGROUND_SAMPLE_SIZE, len(train)), random_state=config.seed)
+        return transformed_frame(estimator, select_model_inputs(sample, config)).to_numpy()
+    except Exception:  # pragma: no cover - never lose a trained model over this
+        logger.exception("could not build the explainer background; /explain will be degraded")
+        return None
 
 
 def _comparison_table(

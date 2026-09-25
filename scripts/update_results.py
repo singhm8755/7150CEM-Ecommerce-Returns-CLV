@@ -176,9 +176,14 @@ def block_experiment_ablation(experiments: dict) -> str:
         "| Model | Raw columns only | With engineered features | Change |",
         "| --- | ---: | ---: | ---: |",
     ]
+    display = {
+        "logistic_regression": "Logistic Regression",
+        "random_forest": "Random Forest",
+        "xgboost": "XGBoost",
+    }
     for model, scores in results.items():
         rows.append(
-            f"| {model.replace('_', ' ').title()} | "
+            f"| {display.get(model, model.replace('_', ' ').title())} | "
             f"{scores['raw_features_only']['average_precision']:.4f} | "
             f"{scores['with_engineered_features']['average_precision']:.4f} | "
             f"**{scores['average_precision_delta']:+.4f}** |"
@@ -189,11 +194,16 @@ def block_experiment_ablation(experiments: dict) -> str:
 
 
 def block_features(explain: dict) -> str:
-    rows = ["| Feature | Mean absolute SHAP | Pushes towards |", "| --- | ---: | --- |"]
+    wording = {
+        "return": "towards a return",
+        "keep": "towards keeping",
+        "mixed": "mixed",
+    }
+    rows = ["| Feature | Mean absolute SHAP | Pushes |", "| --- | ---: | --- |"]
     for feature in explain["top_features"][:10]:
         rows.append(
             f"| `{feature['feature']}` | {feature['mean_abs_shap']:.4f} | "
-            f"{feature['pushes_towards']} |"
+            f"{wording.get(feature['pushes_towards'], feature['pushes_towards'])} |"
         )
     return "\n".join(rows)
 

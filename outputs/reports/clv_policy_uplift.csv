@@ -1,0 +1,4 @@
+risk_segment,customers,mean_clv_gbp,mean_clv_policy_gbp,mean_uplift_gbp,total_uplift_gbp
+Low_Risk,2835,310.1461,310.1461,0.0,0.0
+Medium_Risk,7802,242.6595,242.6595,0.0,0.0
+High_Risk,1363,174.8534,178.4447,3.5913,4894.9385

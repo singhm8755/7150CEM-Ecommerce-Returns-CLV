@@ -50,7 +50,12 @@ its score on genuinely unseen test data. The quantity that matters is the
 **optimism gap** — how much a protocol flatters itself:
 
 <!-- BEGIN:experiment_leakage -->
-_Run `make all` to populate this table._
+| Protocol | Cross-validated average precision | Test average precision | Optimism gap |
+| --- | ---: | ---: | ---: |
+| Resampling inside cross-validation (correct) | 0.4173 | 0.4068 | **+0.0104** |
+| Resampling before cross-validation (leaky) | 0.8626 | 0.4068 | **+0.4558** |
+
+Resampling first inflates the reported cross-validated score by +0.4454 without improving the model.
 <!-- END:experiment_leakage -->
 
 A protocol you can trust reports roughly what it delivers. The leaky one does
@@ -112,7 +117,12 @@ never quietly imply otherwise.
 **The measurement.**
 
 <!-- BEGIN:experiment_threshold -->
-_Run `make all` to populate this table._
+| Threshold chosen on | Threshold | F1 reported on the test set |
+| --- | ---: | ---: |
+| Validation (correct) | 0.32 | 0.4831 |
+| Test set (the mistake) | 0.25 | 0.4899 |
+
+Tuning on the test set overstates F1 by +0.0068 — an improvement nobody could have obtained in advance.
 <!-- END:experiment_threshold -->
 
 ---
@@ -267,7 +277,13 @@ The honest question is whether they help. The ablation runs each candidate model
 with and without them:
 
 <!-- BEGIN:experiment_ablation -->
-_Run `make all` to populate this table._
+| Model | Raw columns only | With engineered features | Change |
+| --- | ---: | ---: | ---: |
+| Logistic Regression | 0.4580 | 0.4617 | **+0.0037** |
+| Random Forest | 0.4069 | 0.4068 | **-0.0001** |
+| XGBoost | 0.4344 | 0.4394 | **+0.0049** |
+
+_Test-set average precision._
 <!-- END:experiment_ablation -->
 
 The answer depends on the model class, which is why the experiment runs across

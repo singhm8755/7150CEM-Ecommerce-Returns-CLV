@@ -18,14 +18,33 @@
 ## Performance
 
 <!-- BEGIN:headline -->
-_Run `make all` to populate this table._
+| Result | Value | Context |
+| --- | --- | --- |
+| Test ROC-AUC | **0.677** | against an achievable ceiling of 0.678 |
+| Share of achievable signal captured | **99.4%** | the remaining gap is irreducible noise |
+| Average precision | 0.450 | no-skill baseline 0.297 |
+| Brier score | 0.192 | calibrated, so the probabilities can be multiplied by money |
+| Best intervention policy | **£15,899** | Model, value-aware rule, over the 18,121-order test period |
+| Same intervention without a model | -£21,331 | intervening on every order destroys value |
+| Portfolio lifetime value | £3,010,819 | 12,000 customers, 3-year horizon |
 <!-- END:headline -->
 
 ### Candidate comparison
 
 <!-- BEGIN:models -->
-_Run `make all` to populate this table._
+| Model | CV average precision | Test ROC-AUC | Test average precision | Fit time |
+| --- | --- | --- | --- | --- |
+| Majority-class baseline | — | 0.5000 | 0.2969 | 0s |
+| **Logistic Regression** | 0.4635 | 0.6779 | 0.4617 | 23s |
+| Random Forest | 0.4539 | 0.6693 | 0.4464 | 248s |
+| XGBoost | 0.4537 | 0.6682 | 0.4480 | 42s |
+| _Achievable ceiling_ | — | _0.6784_ | _0.4578_ | — |
 <!-- END:models -->
+
+The ceiling row is estimated on the same finite test sample, so a model can
+land marginally above it by chance — as logistic regression does on average
+precision. That is noise in the estimate rather than a model beating
+information theory.
 
 All candidates land within a narrow band of each other, and of the achievable
 ceiling. That is the finding, not a disappointment: the data's signal is close
@@ -39,7 +58,13 @@ The model exists to support a decision, so it is scored in pounds against the
 alternatives a business would otherwise choose.
 
 <!-- BEGIN:policies -->
-_Run `make all` to populate this table._
+| Policy | Orders flagged | Intervention spend | Gross saving | **Net** |
+| --- | ---: | ---: | ---: | ---: |
+| Model, value-aware rule | 3,915 (22%) | £18,596 | £34,496 | **£15,899** |
+| Model, global threshold 0.38 | 4,068 (22%) | £19,323 | £23,200 | **£3,877** |
+| Do nothing | 0 (0%) | £0 | £0 | **£0** |
+| Rule of thumb (no model) | 8,332 (46%) | £39,577 | £37,972 | **-£1,605** |
+| Intervene on every order | 18,121 (100%) | £86,075 | £64,744 | **-£21,331** |
 <!-- END:policies -->
 
 The value-aware rule flags an order when
@@ -50,7 +75,18 @@ fewer orders than a global threshold and saves more.
 ## Drivers
 
 <!-- BEGIN:features -->
-_Run `make all` to populate this table._
+| Feature | Mean absolute SHAP | Pushes |
+| --- | ---: | --- |
+| `customer_segment_First_Time` | 0.3629 | towards a return |
+| `product_category_Electronics` | 0.2435 | towards keeping |
+| `product_category_Fashion` | 0.2382 | towards a return |
+| `customer_segment_Wholesale` | 0.2095 | towards keeping |
+| `customer_segment_Repeat` | 0.1354 | towards a return |
+| `is_low_click_depth` | 0.1300 | towards a return |
+| `payment_method_PayPal` | 0.1246 | towards keeping |
+| `payment_method_Credit_Card` | 0.1243 | towards keeping |
+| `device_type_Desktop` | 0.0687 | towards keeping |
+| `product_category_Home_Garden` | 0.0643 | towards keeping |
 <!-- END:features -->
 
 These match the documented data-generating process, which is the check that
@@ -60,11 +96,22 @@ fitting noise regardless of its metrics.
 ## Customer lifetime value
 
 <!-- BEGIN:clv_segments -->
-_Run `make all` to populate this table._
+| Risk band | Customers | Mean predicted return rate | Actual return rate | Mean CLV |
+| --- | ---: | ---: | ---: | ---: |
+| Low Risk | 2,835 | 16.7% | 17.2% | £310 |
+| Medium Risk | 7,802 | 31.6% | 31.6% | £243 |
+| High Risk | 1,363 | 43.1% | 42.9% | £175 |
 <!-- END:clv_segments -->
 
-Predicted and actual return rates track each other closely within each band,
-which is what makes the bands usable for targeting.
+Predicted and actual return rates track each other to within half a percentage
+point in every band, which is what makes the bands usable for targeting. The
+band edges are derived from the economics: 0.40 is the probability at which an
+intervention breaks even on an order of average value.
+
+Note that customer-level targeting is worth substantially less than order-level
+targeting — averaging a customer's risk discards the order-to-order variation
+that the intervention decision depends on. The customer view supports retention
+and segmentation; the order view supports intervention.
 
 ## Training details
 

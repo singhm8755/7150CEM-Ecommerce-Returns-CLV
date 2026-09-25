@@ -1,0 +1,91 @@
+{
+  "model": "Logistic Regression",
+  "assumptions": {
+    "horizon_years": 3,
+    "discount_rate": 0.1,
+    "annual_retention_rate": 0.75,
+    "gross_margin_rate": 0.3,
+    "return_logistics_cost_gbp": 4.5,
+    "return_restocking_loss_rate": 0.05,
+    "intervention_cost_gbp": 4.75,
+    "intervention_effectiveness": 0.25,
+    "frequency_source": "observed transactions per active year"
+  },
+  "n_customers": 12000,
+  "portfolio_clv_gbp": 3010818.9335183077,
+  "mean_clv_gbp": 250.9015777931923,
+  "median_clv_gbp": 231.42552809498164,
+  "negative_clv_customers": 1,
+  "expected_return_cost_gbp": 936204.2397195126,
+  "risk_segments": [
+    {
+      "risk_segment": "Low_Risk",
+      "customers": 2835,
+      "mean_predicted_return_prob": 0.1672,
+      "mean_actual_return_rate": 0.1718,
+      "mean_order_value_gbp": 123.4805,
+      "mean_annual_orders": 5.442,
+      "mean_clv_gbp": 310.1461,
+      "total_clv_gbp": 879264.2996,
+      "total_revenue_gbp": 3410724.86,
+      "share_of_customers": 0.2362
+    },
+    {
+      "risk_segment": "Medium_Risk",
+      "customers": 7802,
+      "mean_predicted_return_prob": 0.3155,
+      "mean_actual_return_rate": 0.316,
+      "mean_order_value_gbp": 123.7536,
+      "mean_annual_orders": 5.641,
+      "mean_clv_gbp": 242.6595,
+      "total_clv_gbp": 1893229.395,
+      "total_revenue_gbp": 9792966.58,
+      "share_of_customers": 0.6502
+    },
+    {
+      "risk_segment": "High_Risk",
+      "customers": 1363,
+      "mean_predicted_return_prob": 0.4306,
+      "mean_actual_return_rate": 0.4293,
+      "mean_order_value_gbp": 123.336,
+      "mean_annual_orders": 5.4332,
+      "mean_clv_gbp": 174.8534,
+      "total_clv_gbp": 238325.2389,
+      "total_revenue_gbp": 1631371.94,
+      "share_of_customers": 0.1136
+    }
+  ],
+  "policy": {
+    "targeted_segment": "High_Risk",
+    "customers_targeted": 1363,
+    "portfolio_clv_after_gbp": 3015713.872022558,
+    "total_uplift_gbp": 4894.938504250163,
+    "uplift_pct": 0.0016257830883673091,
+    "by_segment": [
+      {
+        "risk_segment": "Low_Risk",
+        "customers": 2835,
+        "mean_clv_gbp": 310.1461,
+        "mean_clv_policy_gbp": 310.1461,
+        "mean_uplift_gbp": 0.0,
+        "total_uplift_gbp": 0.0
+      },
+      {
+        "risk_segment": "Medium_Risk",
+        "customers": 7802,
+        "mean_clv_gbp": 242.6595,
+        "mean_clv_policy_gbp": 242.6595,
+        "mean_uplift_gbp": 0.0,
+        "total_uplift_gbp": 0.0
+      },
+      {
+        "risk_segment": "High_Risk",
+        "customers": 1363,
+        "mean_clv_gbp": 174.8534,
+        "mean_clv_policy_gbp": 178.4447,
+        "mean_uplift_gbp": 3.5913,
+        "total_uplift_gbp": 4894.9385
+      }
+    ]
+  }
+}

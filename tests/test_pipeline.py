@@ -264,6 +264,52 @@ def test_single_prediction_explanation_ranks_contributions(bundle, sample_transa
     assert len(contributions) == 4
     magnitudes = [abs(c["contribution"]) for c in contributions]
     assert magnitudes == sorted(magnitudes, reverse=True)
-    assert all(
-        c["direction"] in {"increases return risk", "reduces return risk"} for c in contributions
-    )
+    allowed = {"increases return risk", "reduces return risk", "no material effect"}
+    assert all(c["direction"] in allowed for c in contributions)
+
+
+def test_single_prediction_explanation_is_not_all_zeros(bundle, sample_transaction):
+    """Regression: a one-row request explained against itself returns zeros.
+
+    SHAP measures a prediction against a reference distribution. Handing a
+    linear explainer only the row being explained makes it its own reference,
+    so every contribution collapses to 0.0 and the endpoint silently returns
+    nothing useful. The bundle therefore carries a background sample.
+    """
+    from returns_clv.explain import explain_single
+
+    contributions = explain_single(bundle, sample_transaction, top_n=5)
+    magnitudes = [abs(c["contribution"]) for c in contributions]
+    assert max(magnitudes) > 1e-6, "explanation collapsed to zero contributions"
+
+
+def test_bundle_carries_an_explainer_background(bundle):
+    assert bundle.explainer_background is not None
+    assert bundle.explainer_background.ndim == 2
+    assert len(bundle.explainer_background) > 1
+
+
+def test_explanation_agrees_with_the_generating_process(bundle):
+    """The drivers the model cites should be the ones that actually made the data."""
+    from returns_clv.explain import explain_single
+
+    risky = {
+        "product_category": "Fashion",
+        "payment_method": "Cash_on_Delivery",
+        "device_type": "Mobile",
+        "customer_segment": "First_Time",
+        "order_value_gbp": 130.0,
+        "click_depth": 2,
+        "time_on_page_seconds": 35,
+        "product_page_visits": 3,
+        "customer_tenure_days": 12,
+        "order_frequency_12m": 1,
+    }
+    cited = {c["feature"] for c in explain_single(bundle, risky, top_n=6)}
+    # Each of these carries a documented multiplier in the generating process.
+    drivers = {
+        "customer_segment_First_Time",
+        "payment_method_Cash_on_Delivery",
+        "product_category_Fashion",
+    }
+    assert cited & drivers, f"none of the known drivers were cited: {sorted(cited)}"

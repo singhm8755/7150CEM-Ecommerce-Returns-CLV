@@ -1,0 +1,67 @@
+{
+  "model": "Logistic Regression",
+  "sample_size": 3000,
+  "n_features": 24,
+  "top_features": [
+    {
+      "feature": "customer_segment_First_Time",
+      "mean_abs_shap": 0.3629430427328481,
+      "direction": 1.0,
+      "pushes_towards": "return"
+    },
+    {
+      "feature": "product_category_Electronics",
+      "mean_abs_shap": 0.2434744066691799,
+      "direction": -1.0,
+      "pushes_towards": "keep"
+    },
+    {
+      "feature": "product_category_Fashion",
+      "mean_abs_shap": 0.23815426821820848,
+      "direction": 0.9999999999999963,
+      "pushes_towards": "return"
+    },
+    {
+      "feature": "customer_segment_Wholesale",
+      "mean_abs_shap": 0.20952238068570306,
+      "direction": -1.0,
+      "pushes_towards": "keep"
+    },
+    {
+      "feature": "customer_segment_Repeat",
+      "mean_abs_shap": 0.13538470971407707,
+      "direction": 0.9999999999999996,
+      "pushes_towards": "return"
+    },
+    {
+      "feature": "is_low_click_depth",
+      "mean_abs_shap": 0.12999927935093972,
+      "direction": 0.9999999999999979,
+      "pushes_towards": "return"
+    },
+    {
+      "feature": "payment_method_PayPal",
+      "mean_abs_shap": 0.12459699706416137,
+      "direction": -0.9999999999999932,
+      "pushes_towards": "keep"
+    },
+    {
+      "feature": "payment_method_Credit_Card",
+      "mean_abs_shap": 0.12433687188699953,
+      "direction": -1.0,
+      "pushes_towards": "keep"
+    },
+    {
+      "feature": "device_type_Desktop",
+      "mean_abs_shap": 0.06872774992954363,
+      "direction": -0.999999999999995,
+      "pushes_towards": "keep"
+    },
+    {
+      "feature": "product_category_Home_Garden",
+      "mean_abs_shap": 0.06426038239715187,
+      "direction": -0.9999999999999931,
+      "pushes_towards": "keep"
+    }
+  ]
+}

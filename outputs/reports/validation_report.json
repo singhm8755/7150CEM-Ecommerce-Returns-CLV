@@ -1,17 +1,17 @@
 {
   "passed": true,
   "n_checks": 11,
-  "n_warnings": 2,
+  "n_warnings": 0,
   "n_failures": 0,
   "summary": {
-    "n_transactions": 120000,
-    "n_customers": 12000,
-    "return_rate": 0.294575,
-    "mean_order_value_gbp": 123.62552816666665,
-    "total_revenue_gbp": 14835063.379999999,
-    "date_min": "2024-01-01",
-    "date_max": "2025-12-30",
-    "n_warnings": 2,
+    "n_transactions": 800,
+    "n_customers": 750,
+    "return_rate": 0.205,
+    "mean_order_value_gbp": 119.05959999999999,
+    "total_revenue_gbp": 95247.68,
+    "date_min": "2024-01-02",
+    "date_max": "2025-12-29",
+    "n_warnings": 0,
     "n_failures": 0
   },
   "checks": [
@@ -48,10 +48,10 @@
     {
       "name": "class_balance",
       "status": "PASS",
-      "detail": "positive rate 29.46%, majority:minority 2.39:1",
+      "detail": "positive rate 20.50%, majority:minority 3.88:1",
       "metrics": {
-        "positive_rate": 0.294575,
-        "imbalance_ratio": 2.3947212085207505
+        "positive_rate": 0.205,
+        "imbalance_ratio": 3.878048780487805
       }
     },
     {
@@ -62,35 +62,33 @@
     },
     {
       "name": "tenure_consistency",
-      "status": "WARN",
-      "detail": "tenure is constant for all 11,993 repeat customers - stamped per customer, not measured at transaction time",
-      "metrics": {
-        "constant_customers": 11993.0
-      }
+      "status": "PASS",
+      "detail": "tenure increases with transaction date",
+      "metrics": {}
     },
     {
       "name": "order_frequency_consistency",
-      "status": "WARN",
-      "detail": "93.5% of rows disagree with the observed trailing-12-month order count (median gap 5 orders) - the field is not derivable from this history, so CLV uses observed frequency instead",
+      "status": "PASS",
+      "detail": "matches observed trailing-12-month counts",
       "metrics": {
-        "mismatch_rate": 0.935425,
-        "median_absolute_gap": 5.0
+        "mismatch_rate": 0.0,
+        "median_absolute_gap": 0.0
       }
     },
     {
       "name": "business_logic",
       "status": "PASS",
-      "detail": "COD 41.1% vs other 28.1% (as expected); segments First_Time 37.6% > Repeat 27.2% > Wholesale 7.8% (confirmed)",
+      "detail": "COD 27.2% vs other 19.6% (as expected); segments First_Time 40.0% > Repeat 26.2% > Wholesale 9.6% (confirmed)",
       "metrics": {}
     },
     {
       "name": "dgp_calibration",
       "status": "PASS",
-      "detail": "observed 29.46% vs DGP expectation 29.69% (gap 0.23%)",
+      "detail": "observed 20.50% vs DGP expectation 20.62% (gap 0.12%)",
       "metrics": {
-        "observed_rate": 0.294575,
-        "expected_rate": 0.29690409847916666,
-        "gap": 0.0023290984791666802
+        "observed_rate": 0.205,
+        "expected_rate": 0.20616948125,
+        "gap": 0.0011694812500000207
       }
     }
   ]

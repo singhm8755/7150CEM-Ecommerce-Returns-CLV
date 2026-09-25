@@ -48,22 +48,35 @@ def transformed_frame(estimator: Any, X: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(matrix, columns=names, index=X.index)
 
 
-def shap_values(estimator: Any, frame: pd.DataFrame) -> np.ndarray:
-    """SHAP values for the positive class, as a (n_rows, n_features) array."""
+def shap_values(
+    estimator: Any, frame: pd.DataFrame, background: pd.DataFrame | None = None
+) -> np.ndarray:
+    """SHAP values for the positive class, as a (n_rows, n_features) array.
+
+    Args:
+        estimator: The fitted modelling pipeline.
+        frame: Rows to explain, already in transformed feature space.
+        background: Reference distribution the explanation is measured against.
+            Required for non-tree models when ``frame`` holds a single row: an
+            explainer handed only that row compares it to itself and returns
+            zeros for everything. Tree explainers read the reference off the
+            tree structure and ignore this.
+    """
     import shap
 
     classifier = estimator.named_steps["classifier"]
     model_type = type(classifier).__name__
+    reference = background if background is not None else frame
 
     if model_type in {"RandomForestClassifier", "XGBClassifier", "GradientBoostingClassifier"}:
         explainer = shap.TreeExplainer(classifier)
         values = explainer.shap_values(frame, check_additivity=False)
     elif model_type == "LogisticRegression":
-        explainer = shap.LinearExplainer(classifier, frame)
+        explainer = shap.LinearExplainer(classifier, reference)
         values = explainer.shap_values(frame)
     else:  # pragma: no cover - fallback for a model without a fast explainer
-        background = shap.sample(frame, min(100, len(frame)), random_state=0)
-        explainer = shap.KernelExplainer(lambda d: classifier.predict_proba(d)[:, 1], background)
+        sampled = shap.sample(reference, min(100, len(reference)), random_state=0)
+        explainer = shap.KernelExplainer(lambda d: classifier.predict_proba(d)[:, 1], sampled)
         values = explainer.shap_values(frame, nsamples=100)
 
     values = np.asarray(values)
@@ -71,6 +84,36 @@ def shap_values(estimator: Any, frame: pd.DataFrame) -> np.ndarray:
         # (rows, features, classes) for multi-output tree explainers: keep class 1.
         values = values[..., 1]
     return values
+
+
+def feature_direction(frame: pd.DataFrame, values: np.ndarray) -> pd.Series:
+    """Which way each feature pushes, as the correlation of value with contribution.
+
+    Averaging signed SHAP values across a population answers the wrong question
+    for a one-hot column. ``customer_segment_First_Time`` is 0 for most rows, and
+    those rows contribute negatively relative to the baseline, so the mean comes
+    out negative even though being a first-time buyer plainly raises return risk.
+
+    Correlating each feature's *value* with its *contribution* asks the question
+    that was meant: does a higher value push the prediction towards a return?
+    That works identically for indicators and for continuous features.
+    """
+    directions = {}
+    for position, column in enumerate(frame.columns):
+        feature = frame[column].to_numpy(dtype=float)
+        contribution = values[:, position]
+        if feature.std() < 1e-12 or contribution.std() < 1e-12:
+            directions[column] = 0.0
+        else:
+            directions[column] = float(np.corrcoef(feature, contribution)[0, 1])
+    return pd.Series(directions, name="direction")
+
+
+def _label(direction: float, tolerance: float = 0.05) -> str:
+    """Turn a direction score into a word, without over-reading a weak signal."""
+    if abs(direction) < tolerance:
+        return "mixed"
+    return "return" if direction > 0 else "keep"
 
 
 def run_explain(config: Config, *, df: pd.DataFrame | None = None) -> dict[str, Any]:
@@ -96,15 +139,14 @@ def run_explain(config: Config, *, df: pd.DataFrame | None = None) -> dict[str, 
 
     importance = pd.Series(np.abs(values).mean(axis=0), index=frame.columns, name="mean_abs_shap")
     importance = importance.sort_values(ascending=False)
-    # Mean signed contribution shows direction, which magnitude alone hides.
-    direction = pd.Series(values.mean(axis=0), index=frame.columns, name="mean_shap")
+    direction = feature_direction(frame, values)
 
     figures = config.paths.figures_path
     reports = config.paths.reports_path
     plots.plot_feature_importance(importance, figures / "11_feature_importance.png")
 
     table = pd.concat([importance, direction], axis=1)
-    table["pushes_towards"] = np.where(table["mean_shap"] >= 0, "return", "keep")
+    table["pushes_towards"] = [_label(value) for value in table["direction"]]
     table.round(6).to_csv(reports / "feature_importance.csv")
 
     top = importance.head(10)
@@ -116,8 +158,8 @@ def run_explain(config: Config, *, df: pd.DataFrame | None = None) -> dict[str, 
             {
                 "feature": name,
                 "mean_abs_shap": float(importance[name]),
-                "mean_shap": float(direction[name]),
-                "pushes_towards": "return" if direction[name] >= 0 else "keep",
+                "direction": float(direction[name]),
+                "pushes_towards": _label(direction[name]),
             }
             for name in top.index
         ],
@@ -130,7 +172,7 @@ def run_explain(config: Config, *, df: pd.DataFrame | None = None) -> dict[str, 
 
 def explain_single(
     bundle: ModelBundle, record: dict[str, Any], *, top_n: int = 5
-) -> list[dict[str, Any]]:
+) -> list[dict[str, Any]]:  # noqa: D401
     """Per-transaction explanation, used by the API's ``/explain`` endpoint.
 
     Args:
@@ -143,7 +185,11 @@ def explain_single(
     """
     estimator = unwrap_estimator(bundle.pipeline)
     frame = transformed_frame(estimator, bundle.prepare([record]))
-    values = shap_values(estimator, frame)[0]
+
+    background = getattr(bundle, "explainer_background", None)
+    if background is not None:
+        background = pd.DataFrame(background, columns=frame.columns)
+    values = shap_values(estimator, frame, background)[0]
 
     contributions = pd.Series(values, index=frame.columns)
     ranked = contributions.reindex(contributions.abs().sort_values(ascending=False).index)
@@ -151,7 +197,14 @@ def explain_single(
         {
             "feature": str(name),
             "contribution": float(value),
-            "direction": "increases return risk" if value >= 0 else "reduces return risk",
+            "direction": _direction(float(value)),
         }
         for name, value in ranked.head(top_n).items()
     ]
+
+
+def _direction(value: float, tolerance: float = 1e-9) -> str:
+    """Describe a contribution, without calling a rounding artefact a signal."""
+    if abs(value) < tolerance:
+        return "no material effect"
+    return "increases return risk" if value > 0 else "reduces return risk"

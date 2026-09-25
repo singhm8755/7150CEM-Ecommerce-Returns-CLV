@@ -29,7 +29,7 @@ from returns_clv.logging_utils import get_logger
 logger = get_logger(__name__)
 
 BUNDLE_FILENAME = "return_risk_model.joblib"
-BUNDLE_FORMAT_VERSION = 1
+BUNDLE_FORMAT_VERSION = 2
 
 
 @dataclass
@@ -42,6 +42,11 @@ class ModelBundle:
     feature_columns: list[str]
     categorical_levels: dict[str, list[str]]
     threshold_criterion: str = "net_saving"
+    # A sample of training rows in transformed feature space. SHAP needs a
+    # reference distribution to explain a prediction against: without one, a
+    # single-row request is explained against itself and every contribution
+    # collapses to zero.
+    explainer_background: Any = None
     metrics: dict[str, Any] = field(default_factory=dict)
     config_summary: dict[str, Any] = field(default_factory=dict)
     economics: dict[str, float] = field(default_factory=dict)
