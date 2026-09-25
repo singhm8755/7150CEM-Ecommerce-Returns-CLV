@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Trained models are binary and regenerable with `make train`.
+models/*
+!models/.gitkeep
+
+# Figures and report summaries ARE committed: the README and model card link to
+# them, so a reader browsing the repository sees the actual results rather than
+# broken images. They are regenerated wholesale by `make all`.
+outputs/reports/customer_clv.csv
+outputs/reports/threshold_sweep_*.csv
+outputs/*.parquet
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/

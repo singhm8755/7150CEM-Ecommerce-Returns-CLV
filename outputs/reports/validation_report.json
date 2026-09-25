@@ -1,0 +1,97 @@
+{
+  "passed": true,
+  "n_checks": 11,
+  "n_warnings": 2,
+  "n_failures": 0,
+  "summary": {
+    "n_transactions": 120000,
+    "n_customers": 12000,
+    "return_rate": 0.294575,
+    "mean_order_value_gbp": 123.62552816666665,
+    "total_revenue_gbp": 14835063.379999999,
+    "date_min": "2024-01-01",
+    "date_max": "2025-12-30",
+    "n_warnings": 2,
+    "n_failures": 0
+  },
+  "checks": [
+    {
+      "name": "schema",
+      "status": "PASS",
+      "detail": "all 14 required columns present",
+      "metrics": {}
+    },
+    {
+      "name": "missing_values",
+      "status": "PASS",
+      "detail": "no missing values",
+      "metrics": {}
+    },
+    {
+      "name": "duplicate_ids",
+      "status": "PASS",
+      "detail": "transaction_id is unique",
+      "metrics": {}
+    },
+    {
+      "name": "feature_bounds",
+      "status": "PASS",
+      "detail": "4 features within documented bounds",
+      "metrics": {}
+    },
+    {
+      "name": "target_binary",
+      "status": "PASS",
+      "detail": "returned is binary",
+      "metrics": {}
+    },
+    {
+      "name": "class_balance",
+      "status": "PASS",
+      "detail": "positive rate 29.46%, majority:minority 2.39:1",
+      "metrics": {
+        "positive_rate": 0.294575,
+        "imbalance_ratio": 2.3947212085207505
+      }
+    },
+    {
+      "name": "customer_invariants",
+      "status": "PASS",
+      "detail": "customer_segment constant per customer",
+      "metrics": {}
+    },
+    {
+      "name": "tenure_consistency",
+      "status": "WARN",
+      "detail": "tenure is constant for all 11,993 repeat customers - stamped per customer, not measured at transaction time",
+      "metrics": {
+        "constant_customers": 11993.0
+      }
+    },
+    {
+      "name": "order_frequency_consistency",
+      "status": "WARN",
+      "detail": "93.5% of rows disagree with the observed trailing-12-month order count (median gap 5 orders) - the field is not derivable from this history, so CLV uses observed frequency instead",
+      "metrics": {
+        "mismatch_rate": 0.935425,
+        "median_absolute_gap": 5.0
+      }
+    },
+    {
+      "name": "business_logic",
+      "status": "PASS",
+      "detail": "COD 41.1% vs other 28.1% (as expected); segments First_Time 37.6% > Repeat 27.2% > Wholesale 7.8% (confirmed)",
+      "metrics": {}
+    },
+    {
+      "name": "dgp_calibration",
+      "status": "PASS",
+      "detail": "observed 29.46% vs DGP expectation 29.69% (gap 0.23%)",
+      "metrics": {
+        "observed_rate": 0.294575,
+        "expected_rate": 0.29690409847916666,
+        "gap": 0.0023290984791666802
+      }
+    }
+  ]
+}

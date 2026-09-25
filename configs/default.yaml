@@ -1,0 +1,129 @@
+# ============================================================================
+# Default configuration for the returns / CLV pipeline.
+# Every number the pipeline depends on lives here, so experiments are a config
+# change rather than a code change. Override with: returns-clv --config my.yaml
+# ============================================================================
+
+project:
+  name: returns-clv
+  random_seed: 42
+
+paths:
+  raw_csv: data/synthetic_ecommerce.csv
+  models_dir: models
+  outputs_dir: outputs
+  figures_dir: outputs/figures
+  reports_dir: outputs/reports
+
+# ---------------------------------------------------------------------------
+# Synthetic data generator. The committed dataset was produced with exactly
+# these parameters, so `returns-clv generate` reproduces it byte-for-byte.
+# ---------------------------------------------------------------------------
+data_generation:
+  n_customers: 12000
+  n_transactions: 120000
+  start_date: "2024-01-01"
+  end_date: "2025-12-31"
+  category_base_return_rate:
+    Fashion: 0.30
+    Electronics: 0.15
+    Home_Garden: 0.20
+  category_mix:
+    Fashion: 0.45
+    Electronics: 0.35
+    Home_Garden: 0.20
+  payment_mix:
+    Credit_Card: 0.60
+    PayPal: 0.30
+    Cash_on_Delivery: 0.10
+  device_mix:
+    Mobile: 0.45
+    Desktop: 0.35
+    Tablet: 0.20
+  segment_mix:
+    First_Time: 0.40
+    Repeat: 0.50
+    Wholesale: 0.10
+  # Multiplicative effects applied to the base category return rate.
+  effects:
+    segment_First_Time: 1.4
+    segment_Wholesale: 0.3
+    payment_Cash_on_Delivery: 1.5
+    device_Mobile: 1.1
+    low_click_depth: 1.2       # click_depth <= 3
+    short_dwell: 1.15          # time_on_page_seconds < 60
+  max_return_probability: 0.70
+
+# ---------------------------------------------------------------------------
+# Feature schema
+# ---------------------------------------------------------------------------
+features:
+  target: returned
+  date_column: transaction_date
+  id_columns: [transaction_id, customer_id]
+  categorical:
+    - product_category
+    - payment_method
+    - device_type
+    - customer_segment
+  numeric:
+    - order_value_gbp
+    - click_depth
+    - time_on_page_seconds
+    - product_page_visits
+    - customer_tenure_days
+    - order_frequency_12m
+
+# ---------------------------------------------------------------------------
+# Evaluation protocol.
+# `temporal` is the default: the model is trained on the past and tested on the
+# future, which is how it would be deployed. `random` (stratified) is kept for
+# a sensitivity comparison against the coursework notebooks.
+# ---------------------------------------------------------------------------
+split:
+  strategy: temporal        # temporal | random | grouped
+  test_size: 0.15
+  val_size: 0.15
+
+# ---------------------------------------------------------------------------
+# Training. Resampling is applied INSIDE the cross-validation pipeline so it
+# only ever sees the training folds (see docs/methodology.md).
+# ---------------------------------------------------------------------------
+training:
+  models: [logistic_regression, random_forest, xgboost]
+  resampler: smote          # smote | adasyn | none
+  cv_folds: 3
+  search_iterations: 8      # RandomizedSearchCV budget per model
+  scoring: average_precision
+  selection_metric: average_precision
+  calibration: isotonic     # isotonic | sigmoid | none
+  n_jobs: -1
+
+# ---------------------------------------------------------------------------
+# Unit economics. Drives the cost-sensitive decision threshold and the CLV
+# model. Values are illustrative UK retail figures, documented in
+# docs/methodology.md.
+# ---------------------------------------------------------------------------
+economics:
+  gross_margin_rate: 0.30           # margin earned on a kept order
+  return_logistics_cost_gbp: 4.50   # two-way shipping + processing per return
+  return_restocking_loss_rate: 0.05 # markdown / damage as a share of order value
+  intervention_cost_gbp: 4.75       # blended cost of acting on a flagged transaction:
+                                    # verification effort plus the conversion lost to
+                                    # added checkout friction
+  intervention_effectiveness: 0.25  # relative reduction in return probability
+
+# ---------------------------------------------------------------------------
+# Customer lifetime value
+# ---------------------------------------------------------------------------
+clv:
+  horizon_years: 3
+  discount_rate: 0.10
+  annual_retention_rate: 0.75
+  risk_bands:
+    low: 0.25      # p < 0.25            -> Low_Risk
+    medium: 0.50   # 0.25 <= p < 0.50    -> Medium_Risk
+                   # p >= 0.50           -> High_Risk
+
+explainability:
+  shap_sample_size: 3000

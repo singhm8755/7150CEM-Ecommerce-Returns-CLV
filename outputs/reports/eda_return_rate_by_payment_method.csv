@@ -1,0 +1,4 @@
+payment_method,return_rate,transactions
+Cash_on_Delivery,0.41089680184635674,12132
+Credit_Card,0.2821263718640617,71709
+PayPal,0.2802345197599491,36159
