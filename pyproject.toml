@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "returns-clv"
+version = "1.0.0"
+description = "Return-risk prediction and customer lifetime value analysis for e-commerce (Coventry University 7150CEM)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Manthan Singh" }]
+keywords = ["machine-learning", "e-commerce", "customer-lifetime-value", "imbalanced-classification"]
+dynamic = ["dependencies"]
+
+[project.scripts]
+returns-clv = "returns_clv.cli:main"
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# `api` and `dashboard` live outside the installed package, so the repository
+# root has to be importable. Without this the suite passes under
+# `python -m pytest` (which puts the cwd on sys.path) and fails under the
+# `pytest` console script, which does not.
+pythonpath = ["."]
+addopts = "-q --strict-markers"
+markers = ["slow: marks tests that train models (deselect with '-m \"not slow\"')"]
+filterwarnings = ["ignore::DeprecationWarning", "ignore::FutureWarning"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests"]
+extend-exclude = ["notebooks", ".venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "C4", "SIM", "ARG", "PTH", "RET"]
+ignore = ["B008", "C401"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["ARG001"]
+# Every validation check shares one (df, config) signature so they can live in a
+# registry, which leaves `config` unused in the checks that do not need it.
+"src/returns_clv/data/validate.py" = ["ARG001"]
+
+[tool.coverage.run]
+source = ["src/returns_clv"]
+omit = ["*/__init__.py"]

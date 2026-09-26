@@ -1,0 +1,60 @@
+{
+  "resampling_leakage": {
+    "model": "random_forest",
+    "metric": "average_precision",
+    "correct": {
+      "cv_score": 0.41725170602861583,
+      "test_score": 0.4068312572386705,
+      "optimism_gap": 0.010420448789945358
+    },
+    "leaky": {
+      "cv_score": 0.8626389281165973,
+      "test_score": 0.4068312572386705,
+      "optimism_gap": 0.4558076708779268
+    },
+    "inflation_in_reported_cv": 0.4453872220879814
+  },
+  "threshold_optimism": {
+    "model": "random_forest",
+    "threshold_from_validation": 0.32,
+    "threshold_from_test": 0.25,
+    "reported_f1_honest": 0.48307537435510256,
+    "reported_f1_tuned_on_test": 0.48987088758035763,
+    "overstatement": 0.006795513225255068
+  },
+  "feature_ablation": {
+    "logistic_regression": {
+      "raw_features_only": {
+        "roc_auc": 0.676324920201523,
+        "average_precision": 0.457993251075096
+      },
+      "with_engineered_features": {
+        "roc_auc": 0.6779573282002465,
+        "average_precision": 0.46172444409466384
+      },
+      "average_precision_delta": 0.003731193019567869
+    },
+    "random_forest": {
+      "raw_features_only": {
+        "roc_auc": 0.636422217308006,
+        "average_precision": 0.4068941023264081
+      },
+      "with_engineered_features": {
+        "roc_auc": 0.6384006083384849,
+        "average_precision": 0.4068312572386705
+      },
+      "average_precision_delta": -6.284508773762854e-05
+    },
+    "xgboost": {
+      "raw_features_only": {
+        "roc_auc": 0.657102407243114,
+        "average_precision": 0.4344444236247014
+      },
+      "with_engineered_features": {
+        "roc_auc": 0.660333760539511,
+        "average_precision": 0.4393524448047603
+      },
+      "average_precision_delta": 0.004908021180058897
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "overall_return_rate": 0.294575,
+  "n_transactions": 120000,
+  "n_customers": 12000,
+  "total_revenue_gbp": 14835063.379999999,
+  "mean_order_value_gbp": 123.62552816666665,
+  "return_rate_by_dimension": {
+    "product_category": {
+      "Fashion": 0.3872,
+      "Home_Garden": 0.256,
+      "Electronics": 0.1964
+    },
+    "payment_method": {
+      "Cash_on_Delivery": 0.4109,
+      "Credit_Card": 0.2821,
+      "PayPal": 0.2802
+    },
+    "device_type": {
+      "Mobile": 0.3109,
+      "Tablet": 0.2839,
+      "Desktop": 0.2797
+    },
+    "customer_segment": {
+      "First_Time": 0.3757,
+      "Repeat": 0.2716,
+      "Wholesale": 0.078
+    }
+  },
+  "monthly_return_rate_std": 0.005892166082469805,
+  "feature_correlations": {
+    "order_value_gbp": 0.0004,
+    "click_depth": -0.0417,
+    "time_on_page_seconds": -0.0269,
+    "product_page_visits": 0.0069,
+    "customer_tenure_days": -0.1549,
+    "order_frequency_12m": -0.1736
+  },
+  "strongest_categorical_driver": [
+    "customer_segment",
+    0.2976493313288723
+  ]
+}

@@ -1,0 +1,6 @@
+policy,n_flagged,flag_rate,baseline_return_cost_gbp,gross_saving_gbp,intervention_spend_gbp,net_saving_gbp,residual_return_cost_gbp,saving_per_transaction_gbp,roi
+Do nothing,0,0.0,258974.01,0.0,0.0,0.0,258974.01,0.0,
+Intervene on every order,18121,1.0,258974.01,64743.5,86074.75,-21331.25,194230.51,-1.18,0.75
+Rule of thumb (no model),8332,0.46,258974.01,37971.85,39577.0,-1605.15,221002.16,-0.09,0.96
+"Model, global threshold 0.38",4068,0.22,258974.01,23199.55,19323.0,3876.55,235774.47,0.21,1.2
+"Model, value-aware rule",3915,0.22,258974.01,34495.51,18596.25,15899.26,224478.51,0.88,1.85

@@ -1,0 +1,95 @@
+{
+  "passed": true,
+  "n_checks": 11,
+  "n_warnings": 0,
+  "n_failures": 0,
+  "summary": {
+    "n_transactions": 800,
+    "n_customers": 750,
+    "return_rate": 0.205,
+    "mean_order_value_gbp": 119.05959999999999,
+    "total_revenue_gbp": 95247.68,
+    "date_min": "2024-01-02",
+    "date_max": "2025-12-29",
+    "n_warnings": 0,
+    "n_failures": 0
+  },
+  "checks": [
+    {
+      "name": "schema",
+      "status": "PASS",
+      "detail": "all 14 required columns present",
+      "metrics": {}
+    },
+    {
+      "name": "missing_values",
+      "status": "PASS",
+      "detail": "no missing values",
+      "metrics": {}
+    },
+    {
+      "name": "duplicate_ids",
+      "status": "PASS",
+      "detail": "transaction_id is unique",
+      "metrics": {}
+    },
+    {
+      "name": "feature_bounds",
+      "status": "PASS",
+      "detail": "4 features within documented bounds",
+      "metrics": {}
+    },
+    {
+      "name": "target_binary",
+      "status": "PASS",
+      "detail": "returned is binary",
+      "metrics": {}
+    },
+    {
+      "name": "class_balance",
+      "status": "PASS",
+      "detail": "positive rate 20.50%, majority:minority 3.88:1",
+      "metrics": {
+        "positive_rate": 0.205,
+        "imbalance_ratio": 3.878048780487805
+      }
+    },
+    {
+      "name": "customer_invariants",
+      "status": "PASS",
+      "detail": "customer_segment constant per customer",
+      "metrics": {}
+    },
+    {
+      "name": "tenure_consistency",
+      "status": "PASS",
+      "detail": "tenure increases with transaction date",
+      "metrics": {}
+    },
+    {
+      "name": "order_frequency_consistency",
+      "status": "PASS",
+      "detail": "matches observed trailing-12-month counts",
+      "metrics": {
+        "mismatch_rate": 0.0,
+        "median_absolute_gap": 0.0
+      }
+    },
+    {
+      "name": "business_logic",
+      "status": "PASS",
+      "detail": "COD 27.2% vs other 19.6% (as expected); segments First_Time 40.0% > Repeat 26.2% > Wholesale 9.6% (confirmed)",
+      "metrics": {}
+    },
+    {
+      "name": "dgp_calibration",
+      "status": "PASS",
+      "detail": "observed 20.50% vs DGP expectation 20.62% (gap 0.12%)",
+      "metrics": {
+        "observed_rate": 0.205,
+        "expected_rate": 0.20616948125,
+        "gap": 0.0011694812500000207
+      }
+    }
+  ]
+}
