@@ -451,6 +451,7 @@ features computed as of each transaction date.
 | [`docs/methodology.md`](docs/methodology.md) | Every methodological decision, with measurements |
 | [`docs/model_card.md`](docs/model_card.md) | Performance, limitations, ethical considerations |
 | [`docs/data_dictionary.md`](docs/data_dictionary.md) | Schema, generating process, known defects |
+| [`docs/deployment.md`](docs/deployment.md) | Hosting the dashboard, the API container, local setup |
 | [`notebooks/`](notebooks/) | The original coursework analysis |
 
 ## Limitations

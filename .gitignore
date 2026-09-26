@@ -16,14 +16,20 @@ htmlcov/
 # Jupyter
 .ipynb_checkpoints/
 
-# Trained models are binary and regenerable with `make train`.
+# Trained models are binary and regenerable with `make train`, so they are not
+# tracked - with one exception. The deployed Streamlit dashboard reads the
+# bundle straight from the repository, so the current model is committed to keep
+# the hosted demo working without a build step. It is 1.5 MB and regenerated
+# wholesale by `make train`.
 models/*
 !models/.gitkeep
+!models/return_risk_model.joblib
 
 # Figures and report summaries ARE committed: the README and model card link to
 # them, so a reader browsing the repository sees the actual results rather than
 # broken images. They are regenerated wholesale by `make all`.
-outputs/reports/customer_clv.csv
+# customer_clv.csv is committed for the same reason: the dashboard's CLV view
+# and policy simulator read it directly.
 outputs/reports/threshold_sweep_*.csv
 outputs/*.parquet
 
