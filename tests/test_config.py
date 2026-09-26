@@ -75,3 +75,45 @@ def test_economics_cost_per_return_components():
     assert economics.cost_per_return(value) == pytest.approx(expected)
     # A return always costs more than the margin it forgoes.
     assert economics.cost_per_return(value) > economics.margin_per_kept_order(value)
+
+
+def test_config_is_found_from_the_working_directory(tmp_path: Path, monkeypatch):
+    """A wheel install puts the package in site-packages, far from configs/.
+
+    Resolving the config relative to the module would look inside the Python
+    library directory and find nothing, crashing the container at startup. The
+    working directory is searched first so the same code works from a checkout,
+    a wheel and an image.
+    """
+    from returns_clv.config import find_config_path
+
+    (tmp_path / "configs").mkdir()
+    config_file = tmp_path / "configs" / "default.yaml"
+    config_file.write_text(DEFAULT_CONFIG_PATH.read_text())
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("RETURNS_CLV_CONFIG", raising=False)
+    assert find_config_path() == config_file
+
+    # Relative paths then resolve against that directory, not the install root.
+    config = load_config()
+    assert Path(config.paths.models_dir) == tmp_path / "models"
+
+
+def test_config_env_var_takes_priority(tmp_path: Path, monkeypatch):
+    from returns_clv.config import CONFIG_ENV_VAR, find_config_path
+
+    elsewhere = tmp_path / "custom.yaml"
+    elsewhere.write_text(DEFAULT_CONFIG_PATH.read_text())
+    monkeypatch.setenv(CONFIG_ENV_VAR, str(elsewhere))
+    assert find_config_path() == elsewhere
+
+
+def test_missing_config_everywhere_names_what_was_searched(tmp_path: Path, monkeypatch):
+    import returns_clv.config as config_module
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("RETURNS_CLV_CONFIG", raising=False)
+    monkeypatch.setattr(config_module, "_SOURCE_ROOT", tmp_path / "nowhere")
+    with pytest.raises(FileNotFoundError, match="Searched"):
+        config_module.find_config_path()

@@ -371,7 +371,7 @@ the model, there is only ever one implementation of the feature logic.
 ├── dashboard/app.py          Streamlit dashboard
 ├── notebooks/                the original coursework, de-Colab'd
 ├── configs/default.yaml      every parameter the pipeline depends on
-├── tests/                    136 tests
+├── tests/                    139 tests
 └── docs/                     methodology, model card, data dictionary
 ```
 
@@ -395,7 +395,7 @@ number is worse than no number, because nothing signals that it is wrong.
 ## Testing and CI
 
 ```bash
-make test        # 136 tests
+make test        # 139 tests
 make test-fast   # skips the model-training tests
 make lint        # ruff check + format
 ```

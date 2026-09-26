@@ -24,6 +24,11 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# `api` and `dashboard` live outside the installed package, so the repository
+# root has to be importable. Without this the suite passes under
+# `python -m pytest` (which puts the cwd on sys.path) and fails under the
+# `pytest` console script, which does not.
+pythonpath = ["."]
 addopts = "-q --strict-markers"
 markers = ["slow: marks tests that train models (deselect with '-m \"not slow\"')"]
 filterwarnings = ["ignore::DeprecationWarning", "ignore::FutureWarning"]

@@ -7,14 +7,58 @@ contract between pipeline stages in one place.
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass, field, fields, is_dataclass
 from pathlib import Path
 from typing import Any, TypeVar
 
 import yaml
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_CONFIG_PATH = PROJECT_ROOT / "configs" / "default.yaml"
+CONFIG_ENV_VAR = "RETURNS_CLV_CONFIG"
+CONFIG_FILENAME = Path("configs") / "default.yaml"
+
+# Where the package sits in a source checkout. This is only a *candidate*: an
+# installed wheel puts the module under site-packages, where this points at the
+# Python library directory and no config exists.
+_SOURCE_ROOT = Path(__file__).resolve().parents[2]
+
+
+def config_candidates() -> list[Path]:
+    """Locations searched for the configuration file, in priority order.
+
+    The container installs the package as a wheel and copies ``configs/`` next
+    to the working directory, so resolving relative to the module would look in
+    site-packages and find nothing. Searching the working directory first makes
+    the same code work from a source checkout, an installed wheel and a
+    container image.
+    """
+    candidates = []
+    override = os.environ.get(CONFIG_ENV_VAR)
+    if override:
+        candidates.append(Path(override))
+    candidates.append(Path.cwd() / CONFIG_FILENAME)
+    candidates.append(_SOURCE_ROOT / CONFIG_FILENAME)
+    return candidates
+
+
+def find_config_path() -> Path:
+    """First configuration file that exists, or a message naming every location tried."""
+    candidates = config_candidates()
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    searched = "\n  ".join(str(c) for c in candidates)
+    raise FileNotFoundError(
+        f"no configuration file found. Searched:\n  {searched}\n"
+        f"Set {CONFIG_ENV_VAR} to point at one."
+    )
+
+
+# Kept as module attributes for callers that reference them directly. These are
+# best-effort in a source checkout and may not exist in an installed wheel, so
+# prefer find_config_path().
+PROJECT_ROOT = _SOURCE_ROOT
+DEFAULT_CONFIG_PATH = _SOURCE_ROOT / CONFIG_FILENAME
 
 T = TypeVar("T")
 
@@ -288,25 +332,32 @@ def load_config(
     """Load configuration from YAML and resolve paths against the project root.
 
     Args:
-        path: YAML file to read. Defaults to ``configs/default.yaml``.
+        path: YAML file to read. Defaults to the first match from
+            :func:`config_candidates`.
         root: Directory that relative paths are resolved against. Defaults to
-            the repository root, so the pipeline behaves the same from any cwd.
+            the directory containing the config file's ``configs/`` folder.
         overrides: Nested dict merged over the file contents, e.g.
             ``{"training": {"cv_folds": 2}}``. Used by tests and CLI flags.
 
     Returns:
         A fully populated, immutable :class:`Config`.
     """
-    config_path = Path(path) if path is not None else DEFAULT_CONFIG_PATH
-    if not config_path.exists():
-        raise FileNotFoundError(f"config file not found: {config_path}")
+    if path is not None:
+        config_path = Path(path)
+        if not config_path.exists():
+            raise FileNotFoundError(f"config file not found: {config_path}")
+    else:
+        config_path = find_config_path()
 
     raw = yaml.safe_load(config_path.read_text()) or {}
     if overrides:
         raw = _deep_merge(raw, overrides)
 
     config = _build(Config, raw)
-    resolved_root = (root or PROJECT_ROOT).resolve()
+    # Relative paths resolve against the directory that holds `configs/`, which
+    # is the project directory in a checkout and the working directory in a
+    # container.
+    resolved_root = (root or config_path.resolve().parent.parent).resolve()
     return Config(
         project=config.project,
         paths=config.paths.resolve(resolved_root),
